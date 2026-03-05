@@ -110,6 +110,8 @@ var colors = shuffleArray(defaultcolors);
 
 /* -----------------------------  ----------------------------- */
 
+var freespin = new Image();
+freespin.src = "freespin.png";
 
 var start;
 var spintime = 5000; //ms
@@ -179,8 +181,7 @@ function updatewheel()
 	//	}
 		btx.fillText(names[i], r/2, 0);
 		if (names[i] == "Josh") {
-			var freespin = new Image();
-			freespin.src = "freespin.png";
+			console.log('ding');
 			btx.drawImage(freespin, r/4, -50);
 		}
 		btx.restore();
@@ -270,8 +271,9 @@ function start_spin()
 	target = result + jitter;
 	window.requestAnimationFrame(spin);
 }
-
-add_names();
+freespin.onload = function() {
+	add_names();
+}
 </script>
 </body>
 </html>
