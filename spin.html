@@ -32,6 +32,7 @@ body {
 <canvas id="spinner" width="1000" height="1000"></canvas>
 <div id="form">
 	<form action="javascript:add_names();" method="GET">
+		<!--<input id="namefont" type="hidden" value="48px Comic Sans MS" />-->
 		<input id="namefont" type="hidden" value="48px sans" />
 		<label>Names: <textarea id="names" rows="10" cols="10">
 Brett
@@ -42,6 +43,7 @@ Gary
 James
 Jennifer
 Joel
+Josh
 Lee
 </textarea></label>
 		<input type="submit" value="Set" />
@@ -78,7 +80,6 @@ var offset = 0;
 var styles = 3;
 
 switch (monthAndDate) {
-
 	case "February 14":
 		huejump = 20/numcolors;
 		offset = 350;
@@ -106,7 +107,6 @@ for(var i = 0; i<numcolors; i++){
 
 //var colors = defaultcolors;
 var colors = shuffleArray(defaultcolors);
-
 
 /* -----------------------------  ----------------------------- */
 
@@ -152,13 +152,17 @@ function updatewheel()
 	btx.stroke();
 	btx.fill();
 
+	//names.push("Bankrupt");
 	var count = names.length;
 	var div = Math.PI * 2 / count;
-
+	
 	for(var i = 0; i<count; i++)
 	{
 		var colorindex = i % colors.length;
 		btx.fillStyle = colors[colorindex];
+	//	if (i == count - 1) {
+	//		btx.fillStyle = "black";
+	//	}
 		btx.beginPath();
 		btx.arc(cx, cy, r, -(i-0.5) * div, -(i+0.5)*div, true);
 		btx.lineTo(cx, cy);
@@ -170,7 +174,15 @@ function updatewheel()
 		btx.translate(cx,cy);
 		btx.rotate(-(i) * div);
 		btx.fillStyle = "black";
+	//	if (i == count - 1) {
+	//		btx.fillStyle = "white";
+	//	}
 		btx.fillText(names[i], r/2, 0);
+		if (names[i] == "Josh") {
+			var freespin = new Image();
+			freespin.src = "freespin.png";
+			btx.drawImage(freespin, r/4, -50);
+		}
 		btx.restore();
 	}
 
