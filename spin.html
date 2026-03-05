@@ -62,17 +62,54 @@ function shuffleArray(array) {
 var namefont = '';
 var names = [];
 
+
+/* -------------------------- COLORS -------------------------- */
+
+
 //var defaultcolors = ["red", "orange", "yellow", "green", "blue", "purple", "brown", "gold", "silver" ];
 var defaultcolors = [];
-var numcolors = 7;
+var numcolors = document.getElementById("names").value.length;
+var today = new Date();
+var monthAndDate = today.toLocaleDateString("en-US", {month: 'long', day: 'numeric'});
+var year = today.toLocaleDateString("en-US", {year: 'numeric'});
+
 var huejump = 360/numcolors;
-for(var i = 0; i<numcolors; i++){
-	defaultcolors.push( 'hsl('+i*huejump+',100%,45%)' ); // bold
-	defaultcolors.push( 'hsl('+(i+.33)*huejump+',70%,60%)' ); // mild
-	//defaultcolors.push( 'hsl('+(i+.66)*huejump+',80%,75%)' ); // faded
+var offset = 0;
+var styles = 3;
+
+switch (monthAndDate) {
+
+	case "February 14":
+		huejump = 20/numcolors;
+		offset = 350;
+		styles = 2;
+		break;
+	case "March 17":
+		huejump = 50/numcolors;
+		offset = 95;
+		break;
 }
+
+for(var i = 0; i<numcolors; i++){
+	switch (i % styles) {
+		case 0:
+			defaultcolors.push( 'hsl('+(i*huejump+offset)+',100%,45%)' ); // bold
+			break;
+		case 1:
+			defaultcolors.push( 'hsl('+(i*huejump+offset)+',70%,60%)' ); // mild
+			break;
+		case 2:
+			defaultcolors.push( 'hsl('+(i*huejump+offset)+',80%,25%)' ); // darker
+			break;
+	}
+}
+
 //var colors = defaultcolors;
 var colors = shuffleArray(defaultcolors);
+
+
+/* -----------------------------  ----------------------------- */
+
 
 var start;
 var spintime = 5000; //ms
