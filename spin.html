@@ -26,10 +26,22 @@ body {
 	height: 10%;
 	font-size: 48px;
 }
+#vannadiv {
+	position: fixed;
+	left:20%;
+	bottom:-5px;
+	opacity: 0;
+	transform: scaleX(-1);
+	transition: opacity 0.5s ease-in-out;
+	height: 40%;
+	img { height: 100%; }
+}
+
 </style>
 </head>
 <body>
 <canvas id="spinner" width="1000" height="1000"></canvas>
+<div id="vannadiv"><img src="wof.gif" id="vannagif"></div>    <!---------- The Vanna White gifs are here, delete this line if you're sick of her
 <div id="form">
 	<form action="javascript:add_names();" method="GET">
 		<!--<input id="namefont" type="hidden" value="48px Comic Sans MS" />-->
@@ -43,7 +55,6 @@ Gary
 James
 Jennifer
 Joel
-Josh
 Lee
 </textarea></label>
 		<input type="submit" value="Set" />
@@ -51,6 +62,10 @@ Lee
 	<input id="spin" type="submit" value="Spin!" onclick="javascript:start_spin();" />
 </div>
 <script language="javascript" type="text/javascript">
+
+// Use this line to "rig" the wheel! Replace null with a name in quotations marks and that person will be guaranteed to win!
+// (If the name is not found on the wheel, it will default back to a random spin)
+var forcedWinner = null;
 
 function shuffleArray(array) {
 	for (var i = array.length - 1; i > 0; i--) {
@@ -63,7 +78,9 @@ function shuffleArray(array) {
 
 var namefont = '';
 var names = [];
-
+var highlightStart = null;
+var highlightDuration = 1500;
+var isSpinning = false;
 
 /* -------------------------- COLORS -------------------------- */
 
@@ -79,34 +96,57 @@ var huejump = 360/numcolors;
 var offset = 0;
 var styles = 3;
 
+var useHueChooser = true;
+
 switch (monthAndDate) {
 	case "February 14":
+		// Select only redish colors
 		huejump = 20/numcolors;
 		offset = 350;
 		styles = 2;
 		break;
 	case "March 17":
+		// Select only greenish colors
 		huejump = 50/numcolors;
 		offset = 95;
 		break;
-}
-
-for(var i = 0; i<numcolors; i++){
-	switch (i % styles) {
-		case 0:
-			defaultcolors.push( 'hsl('+(i*huejump+offset)+',100%,45%)' ); // bold
-			break;
-		case 1:
-			defaultcolors.push( 'hsl('+(i*huejump+offset)+',70%,60%)' ); // mild
-			break;
-		case 2:
-			defaultcolors.push( 'hsl('+(i*huejump+offset)+',80%,25%)' ); // darker
-			break;
+	case "July 2": // July 2nd for 2026... closest to the 4th when we'll use the wheel
+	case "July 4":
+		useHueChooser = false;
+		for(var i = 0; i<numcolors; i++){
+		switch (i % 3) {
+			case 0:
+				defaultcolors.push( 'hsl(0,100%,50%)' ); // red
+				break;
+			case 1:
+				defaultcolors.push( 'hsl(0,0%,100%)' ); // white
+				break;
+			case 2:
+				defaultcolors.push( 'hsl(235,100%,50%)' ); // blue
+				break;
+		}
 	}
 }
 
-//var colors = defaultcolors;
-var colors = shuffleArray(defaultcolors);
+if (useHueChooser){
+	for(var i = 0; i<numcolors; i++){
+		switch (i % styles) {
+			case 0:
+				defaultcolors.push( 'hsl('+(i*huejump+offset)+',100%,45%)' ); // bold
+				break;
+			case 1:
+				defaultcolors.push( 'hsl('+(i*huejump+offset)+',70%,60%)' ); // mild
+				break;
+			case 2:
+				defaultcolors.push( 'hsl('+(i*huejump+offset)+',80%,25%)' ); // darker
+				break;
+		}
+	}
+	var colors = shuffleArray(defaultcolors);
+}
+
+
+
 
 /* -----------------------------  ----------------------------- */
 
@@ -233,6 +273,12 @@ function add_names()
 	updatewheel();
 }
 
+function getEligibleIndices(excludedNames = []) {
+    return names
+        .map((name, i) => excludedNames.includes(name) ? null : i)
+        .filter(i => i !== null);
+}
+
 function spin(time)
 {
 	if(start == undefined){start = time};
@@ -240,7 +286,16 @@ function spin(time)
 	var currentrot = spinmove * (1 - Math.cos(Math.PI * progress))/2;
 	rotation = previousrotation + currentrot;
 
-	if(progress >= 1){rotation = target;}
+	if(progress >= 1){
+		rotation = target;
+		highlightStart = performance.now();
+		isSpinning = false;
+		document.getElementById("vannagif").src =  "wof2.gif?t=" + new Date().getTime();	// Show the 2nd Vanna gif
+		setTimeout(() => {
+		  document.getElementById("vannadiv").style.opacity = 0;							// Hide the Vanna gifs after 2 seconds
+		}, 2000);
+			
+	}
 
 	draw_wheel();
 
@@ -248,9 +303,15 @@ function spin(time)
 	{
 		window.requestAnimationFrame(spin);
 	}
+	if (progress >= 1) {
+		draw_highlight(performance.now());
+	}	
 }
 function start_spin()
 {
+	if (isSpinning) return;
+	isSpinning = true;
+
 	if(result != undefined)
 	{
 		names.splice(result, 1);
@@ -262,14 +323,71 @@ function start_spin()
 	start = undefined;
 	var count = names.length;
 	var div = Math.PI * 2 / count;
-	result = getRandomIntInclusive(0, count-1);
+	
+	if (forcedWinner !== null) {
+		result = names.indexOf(forcedWinner);
+		forcedWinner = null;
+		if (result == -1) {result = getRandomIntInclusive(0, count-1);}
+	} else {
+		result = getRandomIntInclusive(0, count-1);
+	}
+	
 	var jitter = getRandomIntInclusive(-40, 40) / 100;
 	var basemove = getRandomIntInclusive(1, 5) * count;
 	spinmove = basemove - rotation + result + jitter;
 	previousrotation = rotation;
 	target = result + jitter;
 	window.requestAnimationFrame(spin);
+	document.getElementById("vannagif").src =  "wof.gif?t=" + new Date().getTime();
+	document.getElementById("vannadiv").style.opacity = 1;
 }
+
+function draw_highlight(time)
+{
+    if (!highlightStart) return;
+
+    let elapsed = time - highlightStart;
+    let progress = elapsed / highlightDuration;
+
+    if (progress > 1) {
+        highlightStart = null;
+        return;
+    }
+
+    let cx = canvas.width / 2;
+    let cy = canvas.height / 2;
+    let r = Math.round(Math.min(cx, cy) * .9);
+
+    let count = names.length;
+    let div = Math.PI * 2 / count;
+
+    // pulse thickness
+    let lineWidth = 8 + 6 * Math.sin(progress * Math.PI * 4);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rotation * div);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(
+        0, 0, r,
+        -(result - 0.5) * div,
+        -(result + 0.5) * div,
+        true
+    );
+    ctx.closePath();
+
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = "yellow";
+    ctx.stroke();
+
+    ctx.restore();
+
+    requestAnimationFrame(draw_highlight);
+}
+
+
 freespin.onload = function() {
 	add_names();
 }
