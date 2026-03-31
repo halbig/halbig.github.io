@@ -41,11 +41,11 @@ body {
 </head>
 <body>
 <canvas id="spinner" width="1000" height="1000"></canvas>
-<div id="vannadiv"><img src="wof.gif" id="vannagif"></div>    <!---------- The Vanna White gifs are here, delete this line if you're sick of her -->
+<div id="vannadiv"><div id="vannagif"></div></div>
 <div id="form">
 	<form action="javascript:add_names();" method="GET">
-		<input id="namefont" type="hidden" value="48px Comic Sans MS" />
-		<!--<input id="namefont" type="hidden" value="48px sans" />-->
+		<!--<input id="namefont" type="hidden" value="48px Comic Sans MS" />-->
+		<input id="namefont" type="hidden" value="48px sans" />
 		<label>Names: <textarea id="names" rows="10" cols="10">
 Brett
 Brian
@@ -59,7 +59,7 @@ Lee
 </textarea></label>
 		<input type="submit" value="Set" />
 	</form>
-	<input id="spin" type="submit" value="Spin!" onclick="javascript:start_spin();" style="font-family:'comic sans ms'"/>
+	<input id="spin" type="submit" value="Spin!" onclick="javascript:start_spin();"/>
 </div>
 <script language="javascript" type="text/javascript">
 
@@ -244,9 +244,9 @@ function draw_wheel()
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
-	ctx.font = "62px 'comic sans ms'";
+	/*ctx.font = "62px 'comic sans ms'";
 	ctx.fillStyle = "white";
-	ctx.fillText("comic sans lol", 30, 66);
+	ctx.fillText("comic sans lol", 30, 66);*/
 	
 	ctx.drawImage(buffer, 0, 0);
 
